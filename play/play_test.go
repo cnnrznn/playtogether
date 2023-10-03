@@ -14,7 +14,7 @@ func TestAreaCalculation(t *testing.T) {
 		RangeKM: 5,
 	}
 
-	area, _ := calculateArea(ping)
+	area := calculateArea(ping)
 	fmt.Println(area)
 
 	pingCO := model.Ping{
@@ -23,6 +23,6 @@ func TestAreaCalculation(t *testing.T) {
 		RangeKM: 5,
 	}
 
-	areaCO, _ := calculateArea(pingCO)
+	areaCO := calculateArea(pingCO)
 	fmt.Println(areaCO)
 }

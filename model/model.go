@@ -1,5 +1,7 @@
 package model
 
+import "fmt"
+
 type Ping struct {
 	Activity string  `json:"activity"`
 	Lat      float64 `json:"lat"`
@@ -15,4 +17,16 @@ type Game struct {
 	Lat      float64  `json:"lat"`
 	Lon      float64  `json:"lon"`
 	Players  []string `json:"players"`
+}
+
+type Area struct {
+	LatMin, LatMax float64
+	LonMin, LonMax float64
+}
+
+func (a Area) String() string {
+	return fmt.Sprintf("Lat: [%v, %v], Lon: [%v, %v]",
+		a.LatMin, a.LatMax,
+		a.LonMin, a.LonMax,
+	)
 }
