@@ -1,22 +1,16 @@
 package play
 
 import (
-	"database/sql"
 	"fmt"
-	"os"
 
 	_ "github.com/lib/pq"
 
+	"github.com/cnnrznn/playtogether/db"
 	"github.com/cnnrznn/playtogether/model"
 )
 
-const (
-	DB_CONN = "hostname=localhost user=pt database=playtogether sslmode=disable"
-)
-
 var (
-	initDone bool    = false
-	db       *sql.DB = nil
+	initDone bool = false
 )
 
 type Response struct {
@@ -36,17 +30,11 @@ func Update(ping model.Ping) (*Response, error) {
 
 func Init() error {
 	if !initDone {
-		conn, err := sql.Open(
-			"postgres",
-			fmt.Sprintf(
-				"%v password='%v'", DB_CONN, os.Getenv("DB_PASSWD"),
-			),
-		)
+		err := db.Init()
 		if err != nil {
 			return err
 		}
 
-		db = conn
 		initDone = true
 	}
 
