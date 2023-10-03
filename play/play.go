@@ -11,3 +11,9 @@ func Update(ping model.Ping) error {
 
 	return nil
 }
+
+type PlayService struct{}
+
+func (s *PlayService) Run() {
+	// every 5m, scan and delete rows in db past expiration
+}
