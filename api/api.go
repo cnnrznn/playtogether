@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/cnnrznn/playtogether/model"
+	"github.com/cnnrznn/playtogether/play"
 )
 
 func Run() error {
@@ -22,9 +23,15 @@ func HandlePlay(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	response, err := play.Update(ping)
+	if err != nil {
+		writeError(w, err, http.StatusInternalServerError)
+		return
+	}
+
 	writeResponse(w, WebRes{
 		Status:  http.StatusOK,
-		Payload: ping,
+		Payload: response,
 	})
 }
 
