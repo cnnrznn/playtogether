@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/cnnrznn/playtogether/api/model"
+	"github.com/cnnrznn/playtogether/model"
 )
 
 func Run() error {
