@@ -14,10 +14,10 @@ const (
 	DB_CONN = "hostname=localhost user=pt database=playtogether sslmode=disable"
 )
 
-type PlayService struct {
-	db       *sql.DB
-	initDone bool
-}
+var (
+	initDone bool    = false
+	db       *sql.DB = nil
+)
 
 func Update(ping model.Ping) error {
 	// First, check for games already going on in the area
@@ -29,8 +29,8 @@ func Update(ping model.Ping) error {
 	return nil
 }
 
-func (s *PlayService) Init() error {
-	if !s.initDone {
+func Init() error {
+	if !initDone {
 		conn, err := sql.Open(
 			"postgres",
 			fmt.Sprintf(
@@ -41,23 +41,22 @@ func (s *PlayService) Init() error {
 			return err
 		}
 
-		s.db = conn
+		db = conn
+		initDone = true
 	}
 
 	return nil
 }
 
-func (s *PlayService) Run() error {
+func Run() error {
 	// every 5m, scan and delete rows in db past expiration
-	if err := s.Init(); err != nil {
+	if err := Init(); err != nil {
 		return err
 	}
 
-	go s.runExpire()
-
-	return nil
+	return runExpire()
 }
 
-func (s *PlayService) runExpire() error {
+func runExpire() error {
 	return nil
 }
