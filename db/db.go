@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+
+	"github.com/cnnrznn/playtogether/model"
 )
 
 const (
@@ -32,5 +34,13 @@ func Init() error {
 		initDone = true
 	}
 
+	return nil
+}
+
+func GetGames(ping model.Ping, area model.Area) []model.Game {
+	return nil
+}
+
+func NewPlayer(model.Ping, model.Area) *model.Game {
 	return nil
 }

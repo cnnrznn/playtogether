@@ -1,7 +1,6 @@
 package play
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/jftuga/geodist"
@@ -16,45 +15,50 @@ var (
 )
 
 type Response struct {
-	Found bool       `json:"found"`
-	Game  model.Game `json:"game,omitempty"`
-}
-
-type Area struct {
-	latMin, latMax float64
-	lonMin, lonMax float64
-}
-
-func (a Area) String() string {
-	return fmt.Sprintf("Lat: [%v, %v], Lon: [%v, %v]",
-		a.latMin, a.latMax,
-		a.lonMin, a.lonMax,
-	)
+	Found bool         `json:"found"`
+	Games []model.Game `json:"games,omitempty"`
 }
 
 func Update(ping model.Ping) (*Response, error) {
 	// calculate lat,lon range for game or other players
-	calculateArea(ping)
+	area := calculateArea(ping)
 
 	// First, check for games already going on in the area
+	games := db.GetGames(ping, area)
+
+	if len(games) > 0 {
+		return &Response{
+			Found: true,
+			Games: games,
+		}, nil
+	}
 
 	// If no games found, put player into players DB and try to create a game with the new player information
+	game := db.NewPlayer(ping, area)
 
-	// If game created, put game into games table and send alerts to players
+	if game != nil {
+		return &Response{
+			Found: true,
+			Games: []model.Game{*game},
+		}, nil
+	}
 
-	return nil, fmt.Errorf("not implemented")
+	// If new game created, send alerts to players
+	// TODO
+
+	return &Response{Found: false}, nil
 }
 
-func calculateArea(ping model.Ping) (*Area, error) {
+func calculateArea(ping model.Ping) model.Area {
 	latDelta := calculateDegree(ping, true)
 	lonDelta := calculateDegree(ping, false)
 
-	return &Area{
-		latMin: ping.Lat - latDelta,
-		latMax: ping.Lat + latDelta,
-		lonMin: ping.Lon - lonDelta,
-		lonMax: ping.Lon + lonDelta,
-	}, nil
+	return model.Area{
+		LatMin: ping.Lat - latDelta,
+		LatMax: ping.Lat + latDelta,
+		LonMin: ping.Lon - lonDelta,
+		LonMax: ping.Lon + lonDelta,
+	}
 }
 
 func calculateDegree(ping model.Ping, latitude bool) float64 {
