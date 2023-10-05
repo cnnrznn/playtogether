@@ -5,10 +5,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cnnrznn/playtogether/db"
 	"github.com/cnnrznn/playtogether/model"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
+
+func before() {
+}
+
+func after() {
+}
 
 func TestAreaCalculation(t *testing.T) {
 	ping := model.Ping{
@@ -31,6 +38,14 @@ func TestAreaCalculation(t *testing.T) {
 }
 
 func TestPing(t *testing.T) {
+	before()
+	defer after()
+
+	err := db.Init()
+	if err != nil {
+		t.Error(err)
+	}
+
 	ping := model.Ping{
 		Player:   uuid.New(),
 		Activity: "volleyball",
