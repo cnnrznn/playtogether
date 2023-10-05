@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -106,7 +107,6 @@ func GetPings(activity string, area model.Area) ([]model.Ping, error) {
 func NewPing(ping model.Ping) error {
 	id := uuid.New()
 
-	// put ping in table
 	result, err := db.Exec(`
 			INSERT INTO ping (id, player, lat, lon, range_km, expire) VALUES
 			$1, $2, $3, $4, $5, $6`,
@@ -117,6 +117,27 @@ func NewPing(ping model.Ping) error {
 	}
 	if n, err := result.RowsAffected(); err != nil || n != 1 {
 		return fmt.Errorf("could not insert ping in table: %w", err)
+	}
+
+	return nil
+}
+
+func NewGame(game model.Game) error {
+	bs, err := json.Marshal(game.Players)
+	if err != nil {
+		return err
+	}
+
+	result, err := db.Exec(`
+		INSERT INTO games (id, players, lat, lon, activity) VALUES
+			$1, $2, $3, $4, $5`,
+		game.Id, bs, game.Lat, game.Lon, game.Activity,
+	)
+	if err != nil {
+		return err
+	}
+	if n, err := result.RowsAffected(); err != nil || n != 1 {
+		return fmt.Errorf("could not insert game in table: %w", err)
 	}
 
 	return nil

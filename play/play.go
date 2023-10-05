@@ -1,11 +1,10 @@
 package play
 
 import (
-	"fmt"
 	"math"
 
+	"github.com/google/uuid"
 	"github.com/jftuga/geodist"
-	_ "github.com/lib/pq"
 
 	"github.com/cnnrznn/playtogether/db"
 	"github.com/cnnrznn/playtogether/model"
@@ -52,16 +51,44 @@ func Update(ping model.Ping) (*Response, error) {
 	// verify there are enough players to create a game, namely
 	// 1. iterate over all players and calculate distance to new player
 	// 2. if <activity::threshold> players are in <rangeKM> of new player, create game
+	filteredPlayers := []model.Ping{}
 	for _, player := range players {
-		fmt.Println(player)
+		_, km, _ := geodist.VincentyDistance(
+			geodist.Coord{Lat: player.Lat, Lon: player.Lon},
+			geodist.Coord{Lat: ping.Lat, Lon: ping.Lon},
+		)
+		if km < float64(player.RangeKM) {
+			filteredPlayers = append(filteredPlayers, player)
+		}
 	}
 
-	// put new game in DB
+	if atThreshold(ping.Activity, filteredPlayers) {
+		game := model.Game{
+			Id:       uuid.New(),
+			Activity: ping.Activity,
+			Lat:      ping.Lat,
+			Lon:      ping.Lon,
+			Players:  playerIds(filteredPlayers),
+		}
+
+		// put new game in DB
+		err := db.NewGame(game)
+		if err != nil {
+			return nil, err
+		}
+
+		return &Response{
+			Found: true,
+			Games: []model.Game{game},
+		}, nil
+	}
 
 	// If new game created, send alerts to players
 	// TODO make this it's own method to be used with push notifications
 
-	return nil, fmt.Errorf("not implemented completely")
+	return &Response{
+		Found: false,
+	}, nil
 }
 
 func calculateArea(ping model.Ping) model.Area {
@@ -148,4 +175,21 @@ func Run() error {
 
 func runExpire() error {
 	return nil
+}
+
+func atThreshold(activity string, players []model.Ping) bool {
+	switch activity {
+	case "volleyball":
+		return len(players) >= 4
+	default:
+		return false
+	}
+}
+
+func playerIds(players []model.Ping) []string {
+	ids := []string{}
+	for _, player := range players {
+		ids = append(ids, player.Player.String())
+	}
+	return ids
 }
