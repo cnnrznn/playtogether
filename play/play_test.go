@@ -60,5 +60,5 @@ func TestPing(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Equal(t, res.Found, false)
+	assert.Equal(t, false, res.Found)
 }
