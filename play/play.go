@@ -1,4 +1,4 @@
-package ping
+package play
 
 import (
 	"fmt"
