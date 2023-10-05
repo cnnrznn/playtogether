@@ -1,3 +1,5 @@
+github.com/google/uuid v1.3.1 h1:KjJaJ9iWZ3jOFZIf1Lqf4laDRCasjl0BCmnEGxkdLb4=
+github.com/google/uuid v1.3.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/jftuga/geodist v1.0.0 h1:PFPQlZtj10u8ETAYTyxE0DWMl1bwA+Xzrqb4+oLkkC0=
 github.com/jftuga/geodist v1.0.0/go.mod h1:BohEDxpZ8S5ADAxW/9EKPSKWOVl0+3wHENIT40m4UO4=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
