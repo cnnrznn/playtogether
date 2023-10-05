@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/cnnrznn/playtogether/model"
+	"github.com/google/uuid"
 )
 
 const (
@@ -44,9 +45,9 @@ func GetGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 		SELECT (id, lat, lon) FROM games
 			WHERE
 				activity = $5 AND
-				lat < $1 and lat > $2 AND lon < $3 AND lon > $4
-	`, area.LatMax, area.LatMin, area.LonMax, area.LonMin,
-		ping.Activity)
+				lat < $1 and lat > $2 AND lon < $3 AND lon > $4`,
+		area.LatMax, area.LatMin, area.LonMax, area.LonMin, ping.Activity,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +70,57 @@ func GetGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 	return games, nil
 }
 
-func NewPlayer(model.Ping, model.Area) *model.Game {
+func GetPings(activity string, area model.Area) ([]model.Ping, error) {
+	pings := []model.Ping{}
+
+	rows, err := db.Query(`
+		SELECT (player, lat, lon, range_km) FROM ping
+		WHERE
+			activity = $1 AND
+			lat < $2 AND lat > $3 AND lon < $4 AND lon > $5`,
+		activity, area.LatMax, area.LatMin, area.LonMax, area.LonMin,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		ping := model.Ping{}
+
+		err := rows.Scan(
+			&ping.Player,
+			&ping.Lat,
+			&ping.Lon,
+			&ping.RangeKM,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		pings = append(pings, ping)
+	}
+
+	return pings, nil
+}
+
+func NewPing(ping model.Ping) error {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return err
+	}
+
+	// put ping in table
+	result, err := db.Exec(`
+			INSERT INTO ping (id, player, lat, lon, range_km, expire) VALUES
+			$1, $2, $3, $4, $5, $6`,
+		id, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire,
+	)
+	if err != nil {
+		return err
+	}
+	if n, err := result.RowsAffected(); err != nil || n != 1 {
+		return fmt.Errorf("could not insert ping in table: %w", err)
+	}
+
 	return nil
 }
