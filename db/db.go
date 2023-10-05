@@ -37,8 +37,36 @@ func Init() error {
 	return nil
 }
 
-func GetGames(ping model.Ping, area model.Area) []model.Game {
-	return nil
+func GetGames(ping model.Ping, area model.Area) ([]model.Game, error) {
+	games := []model.Game{}
+
+	rows, err := db.Query(`
+		SELECT (id, lat, lon) FROM games
+			WHERE
+				activity = $5 AND
+				lat < $1 and lat > $2 AND lon < $3 AND lon > $4
+	`, area.LatMax, area.LatMin, area.LonMax, area.LonMin,
+		ping.Activity)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		game := model.Game{}
+
+		err := rows.Scan(
+			&game.Id,
+			&game.Lat,
+			&game.Lon,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		games = append(games, game)
+	}
+
+	return games, nil
 }
 
 func NewPlayer(model.Ping, model.Area) *model.Game {

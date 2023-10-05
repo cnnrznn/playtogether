@@ -1,6 +1,10 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type Ping struct {
 	Activity string  `json:"activity"`
@@ -13,10 +17,11 @@ type Ping struct {
 }
 
 type Game struct {
-	Activity string   `json:"activity"`
-	Lat      float64  `json:"lat"`
-	Lon      float64  `json:"lon"`
-	Players  []string `json:"players"`
+	Id       uuid.UUID `json:"id"`
+	Activity string    `json:"activity"`
+	Lat      float64   `json:"lat"`
+	Lon      float64   `json:"lon"`
+	Players  []string  `json:"players"`
 }
 
 type Area struct {
