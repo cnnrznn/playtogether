@@ -49,12 +49,17 @@ func Update(ping model.Ping) (*Response, error) {
 		return nil, err
 	}
 
-	// verify there are enough players to create a game
+	// verify there are enough players to create a game, namely
+	// 1. iterate over all players and calculate distance to new player
+	// 2. if <activity::threshold> players are in <rangeKM> of new player, create game
+	for _, player := range players {
+		fmt.Println(player)
+	}
 
 	// put new game in DB
 
 	// If new game created, send alerts to players
-	// TODO
+	// TODO make this it's own method to be used with push notifications
 
 	return nil, fmt.Errorf("not implemented completely")
 }
