@@ -104,10 +104,7 @@ func GetPings(activity string, area model.Area) ([]model.Ping, error) {
 }
 
 func NewPing(ping model.Ping) error {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
+	id := uuid.New()
 
 	// put ping in table
 	result, err := db.Exec(`
