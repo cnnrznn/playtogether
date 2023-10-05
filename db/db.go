@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/lib/pq"
+
 	"github.com/cnnrznn/playtogether/model"
 	"github.com/google/uuid"
 )
 
 const (
-	DB_CONN = "hostname=localhost user=pt database=playtogether sslmode=disable"
+	DB_CONN = "host=localhost user=pt database=playtogether sslmode=disable"
 )
 
 var (
@@ -43,15 +45,16 @@ func GetGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 	games := []model.Game{}
 
 	rows, err := db.Query(`
-		SELECT (id, lat, lon) FROM games
+		SELECT id, lat, lon FROM games
 			WHERE
 				activity = $5 AND
-				lat < $1 and lat > $2 AND lon < $3 AND lon > $4`,
+				lat < $1 AND lat > $2 AND lon < $3 AND lon > $4`,
 		area.LatMax, area.LatMin, area.LonMax, area.LonMin, ping.Activity,
 	)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		game := model.Game{}
@@ -75,7 +78,7 @@ func GetPings(activity string, area model.Area) ([]model.Ping, error) {
 	pings := []model.Ping{}
 
 	rows, err := db.Query(`
-		SELECT (player, lat, lon, range_km) FROM ping
+		SELECT player, lat, lon, range_km FROM ping
 		WHERE
 			activity = $1 AND
 			lat < $2 AND lat > $3 AND lon < $4 AND lon > $5`,
@@ -84,6 +87,7 @@ func GetPings(activity string, area model.Area) ([]model.Ping, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		ping := model.Ping{}
@@ -108,9 +112,9 @@ func NewPing(ping model.Ping) error {
 	id := uuid.New()
 
 	result, err := db.Exec(`
-			INSERT INTO ping (id, player, lat, lon, range_km, expire) VALUES
-			$1, $2, $3, $4, $5, $6`,
-		id, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire,
+			INSERT INTO ping (id, player, lat, lon, range_km, expire, activity) VALUES
+			($1, $2, $3, $4, $5, $6, $7)`,
+		id, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire, ping.Activity,
 	)
 	if err != nil {
 		return err
@@ -130,7 +134,7 @@ func NewGame(game model.Game) error {
 
 	result, err := db.Exec(`
 		INSERT INTO games (id, players, lat, lon, activity) VALUES
-			$1, $2, $3, $4, $5`,
+			($1, $2, $3, $4, $5)`,
 		game.Id, bs, game.Lat, game.Lon, game.Activity,
 	)
 	if err != nil {
