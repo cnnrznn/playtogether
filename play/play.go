@@ -2,6 +2,7 @@ package play
 
 import (
 	"math"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jftuga/geodist"
@@ -165,7 +166,6 @@ func Init() error {
 }
 
 func Run() error {
-	// every 5m, scan and delete rows in db past expiration
 	if err := Init(); err != nil {
 		return err
 	}
@@ -174,7 +174,14 @@ func Run() error {
 }
 
 func runExpire() error {
-	return nil
+	ticker := time.NewTicker(1 * time.Minute)
+
+	for {
+		select {
+		case <-ticker.C:
+			db.Expire()
+		}
+	}
 }
 
 func atThreshold(activity string, players []model.Ping) bool {

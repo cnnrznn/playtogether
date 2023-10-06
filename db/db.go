@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -145,4 +146,12 @@ func NewGame(game model.Game) error {
 	}
 
 	return nil
+}
+
+func Expire() {
+	db.Exec(`
+		DELETE FROM ping
+		WHERE expire < $1`,
+		time.Now().Unix(),
+	)
 }
