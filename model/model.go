@@ -22,7 +22,6 @@ type Game struct {
 	Activity string    `json:"activity"`
 	Lat      float64   `json:"lat"`
 	Lon      float64   `json:"lon"`
-	Players  []string  `json:"players"`
 }
 
 type Area struct {

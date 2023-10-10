@@ -69,7 +69,6 @@ func Update(ping model.Ping) (*Response, error) {
 			Activity: ping.Activity,
 			Lat:      ping.Lat,
 			Lon:      ping.Lon,
-			Players:  playerIds(filteredPlayers),
 		}
 
 		// put new game in DB
@@ -191,12 +190,4 @@ func atThreshold(activity string, players []model.Ping) bool {
 	default:
 		return false
 	}
-}
-
-func playerIds(players []model.Ping) []string {
-	ids := []string{}
-	for _, player := range players {
-		ids = append(ids, player.Player.String())
-	}
-	return ids
 }

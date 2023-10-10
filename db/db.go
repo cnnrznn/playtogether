@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -128,15 +127,10 @@ func NewPing(ping model.Ping) error {
 }
 
 func NewGame(game model.Game) error {
-	bs, err := json.Marshal(game.Players)
-	if err != nil {
-		return err
-	}
-
 	result, err := db.Exec(`
-		INSERT INTO games (id, players, lat, lon, activity) VALUES
-			($1, $2, $3, $4, $5)`,
-		game.Id, bs, game.Lat, game.Lon, game.Activity,
+		INSERT INTO games (id, lat, lon, activity) VALUES
+			($1, $2, $3, $4)`,
+		game.Id, game.Lat, game.Lon, game.Activity,
 	)
 	if err != nil {
 		return err
