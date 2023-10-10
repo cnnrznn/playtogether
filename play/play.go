@@ -77,7 +77,7 @@ func Update(ping model.Ping) (*Response, error) {
 			return nil, err
 		}
 
-		// TODO associate player with new game
+		// TODO associate all players with new game
 
 		return &Response{
 			Found: true,
@@ -177,12 +177,11 @@ func Run() error {
 func runExpire() error {
 	ticker := time.NewTicker(1 * time.Minute)
 
-	for {
-		select {
-		case <-ticker.C:
-			db.Expire()
-		}
+	for range ticker.C {
+		db.Expire()
 	}
+
+	return nil
 }
 
 func atThreshold(activity string, players []model.Ping) bool {
