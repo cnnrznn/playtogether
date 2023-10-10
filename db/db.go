@@ -113,7 +113,10 @@ func StorePing(ping model.Ping) error {
 
 	result, err := db.Exec(`
 			INSERT INTO ping (id, player, lat, lon, range_km, expire, activity) VALUES
-			($1, $2, $3, $4, $5, $6, $7)`,
+			($1, $2, $3, $4, $5, $6, $7)
+			ON CONFLICT ON CONSTRAINT unq_player_activity
+			DO UPDATE SET
+				lat=$3, lon=$4, range_km=$5, expire=$6`,
 		id, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire, ping.Activity,
 	)
 	if err != nil {
