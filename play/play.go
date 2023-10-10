@@ -25,7 +25,7 @@ func Update(ping model.Ping) (*Response, error) {
 	area := calculateArea(ping)
 
 	// First, check for games already going on in the area
-	games, err := db.GetGames(ping, area)
+	games, err := db.LoadGames(ping, area)
 	if err != nil {
 		return nil, err
 	}
@@ -38,13 +38,13 @@ func Update(ping model.Ping) (*Response, error) {
 	}
 
 	// If no games found, put player into players DB and try to create a game with the new player information
-	err = db.NewPing(ping)
+	err = db.StorePing(ping)
 	if err != nil {
 		return nil, err
 	}
 
 	// Load all players in area for activity
-	players, err := db.GetPings(ping.Activity, area)
+	players, err := db.LoadPings(ping.Activity, area)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func Update(ping model.Ping) (*Response, error) {
 		}
 
 		// put new game in DB
-		err := db.NewGame(game)
+		err := db.StoreGame(game)
 		if err != nil {
 			return nil, err
 		}

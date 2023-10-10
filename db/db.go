@@ -41,7 +41,7 @@ func Init() error {
 	return nil
 }
 
-func GetGames(ping model.Ping, area model.Area) ([]model.Game, error) {
+func LoadGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 	games := []model.Game{}
 
 	rows, err := db.Query(`
@@ -74,7 +74,7 @@ func GetGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 	return games, nil
 }
 
-func GetPings(activity string, area model.Area) ([]model.Ping, error) {
+func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 	pings := []model.Ping{}
 
 	rows, err := db.Query(`
@@ -108,7 +108,7 @@ func GetPings(activity string, area model.Area) ([]model.Ping, error) {
 	return pings, nil
 }
 
-func NewPing(ping model.Ping) error {
+func StorePing(ping model.Ping) error {
 	id := uuid.New()
 
 	result, err := db.Exec(`
@@ -126,7 +126,7 @@ func NewPing(ping model.Ping) error {
 	return nil
 }
 
-func NewGame(game model.Game) error {
+func StoreGame(game model.Game) error {
 	result, err := db.Exec(`
 		INSERT INTO games (id, lat, lon, activity) VALUES
 			($1, $2, $3, $4)`,
