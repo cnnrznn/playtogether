@@ -20,6 +20,10 @@ type Response struct {
 	Games []model.Game `json:"games,omitempty"`
 }
 
+func GetPlayerGames(player model.Player) []model.Game {
+	return db.LoadPlayerGames(player)
+}
+
 func Update(ping model.Ping) (*Response, error) {
 	area := calculateArea(ping)
 

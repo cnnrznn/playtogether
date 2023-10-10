@@ -154,18 +154,77 @@ func Expire() {
 }
 
 func StorePlayerGame(ping model.Ping, game model.Game) {
-	for {
-		_, err := db.Exec(`
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = tx.Exec(`
 			INSERT INTO player2game (player, game)
 			VALUES
 				($1, $2)
 			ON CONFLICT DO NOTHING`,
-			ping.Player, game.Id,
-		)
-		if err == nil {
+		ping.Player, game.Id,
+	)
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
+
+	// TODO also map game->ping to calculate start,end, etc.
+}
+
+func LoadPlayerGames(player model.Player) []model.Game {
+	result := []model.Game{}
+	gameIDs := []uuid.UUID{}
+
+	rows, err := db.Query(`
+		SELECT game from player2game WHERE player=$1`,
+		player.ID)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var gameID uuid.UUID
+		if err := rows.Scan(&gameID); err != nil {
+			fmt.Println(err)
 			break
 		}
 
-		// TODO also map game->ping to calculate start,end, etc.
+		gameIDs = append(gameIDs, gameID)
 	}
+	if rows.Err() != nil {
+		fmt.Println(rows.Err())
+		return nil
+	}
+
+	for _, gameID := range gameIDs {
+		var game model.Game
+
+		row := db.QueryRow(`SELECT id, lat, lon, activity from games WHERE id=$1`, gameID)
+		if row.Err() != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		if err := row.Scan(
+			&game.Id,
+			&game.Lat,
+			&game.Lon,
+			&game.Activity,
+		); err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		result = append(result, game)
+	}
+
+	return result
 }
