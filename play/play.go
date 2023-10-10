@@ -21,8 +21,12 @@ type Response struct {
 }
 
 func Update(ping model.Ping) (*Response, error) {
-	// calculate lat,lon range for game or other players
 	area := calculateArea(ping)
+
+	err := db.StorePing(ping)
+	if err != nil {
+		return nil, err
+	}
 
 	// First, check for games already going on in the area
 	games, err := db.LoadGames(ping, area)
@@ -31,16 +35,12 @@ func Update(ping model.Ping) (*Response, error) {
 	}
 
 	if len(games) > 0 {
+		// TODO associate player with game
+
 		return &Response{
 			Found: true,
 			Games: games,
 		}, nil
-	}
-
-	// If no games found, put player into players DB and try to create a game with the new player information
-	err = db.StorePing(ping)
-	if err != nil {
-		return nil, err
 	}
 
 	// Load all players in area for activity
@@ -76,6 +76,8 @@ func Update(ping model.Ping) (*Response, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		// TODO associate player with new game
 
 		return &Response{
 			Found: true,
