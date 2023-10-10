@@ -188,6 +188,6 @@ func atThreshold(activity string, players []model.Ping) bool {
 	case "volleyball":
 		return len(players) >= 4
 	default:
-		return false
+		return len(players) >= 2
 	}
 }
