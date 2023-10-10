@@ -36,7 +36,7 @@ func Update(ping model.Ping) (*Response, error) {
 
 	if len(games) > 0 {
 		for _, game := range games {
-			db.StorePlayerGame(ping.Player, game)
+			db.StorePlayerGame(ping, game)
 		}
 
 		return &Response{
@@ -80,7 +80,7 @@ func Update(ping model.Ping) (*Response, error) {
 		}
 
 		for _, player := range filteredPlayers {
-			db.StorePlayerGame(player.Player, game)
+			db.StorePlayerGame(player, game)
 		}
 
 		return &Response{

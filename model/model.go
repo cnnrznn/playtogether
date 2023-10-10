@@ -17,6 +17,10 @@ type Ping struct {
 	// other stuff like age, intensity
 }
 
+type Player struct {
+	ID uuid.UUID `json:"id"`
+}
+
 type Game struct {
 	Id       uuid.UUID `json:"id"`
 	Activity string    `json:"activity"`

@@ -153,17 +153,19 @@ func Expire() {
 	)
 }
 
-func StorePlayerGame(playerID uuid.UUID, game model.Game) {
+func StorePlayerGame(ping model.Ping, game model.Game) {
 	for {
 		_, err := db.Exec(`
 			INSERT INTO player2game (player, game)
 			VALUES
 				($1, $2)
 			ON CONFLICT DO NOTHING`,
-			playerID, game.Id,
+			ping.Player, game.Id,
 		)
 		if err == nil {
 			break
 		}
+
+		// TODO also map game->ping to calculate start,end, etc.
 	}
 }
