@@ -35,7 +35,9 @@ func Update(ping model.Ping) (*Response, error) {
 	}
 
 	if len(games) > 0 {
-		// TODO associate player with game
+		for _, game := range games {
+			db.StorePlayerGame(ping.Player, game)
+		}
 
 		return &Response{
 			Found: true,
@@ -77,16 +79,15 @@ func Update(ping model.Ping) (*Response, error) {
 			return nil, err
 		}
 
-		// TODO associate all players with new game
+		for _, player := range filteredPlayers {
+			db.StorePlayerGame(player.Player, game)
+		}
 
 		return &Response{
 			Found: true,
 			Games: []model.Game{game},
 		}, nil
 	}
-
-	// If new game created, send alerts to players
-	// TODO make this it's own method to be used with push notifications
 
 	return &Response{
 		Found: false,

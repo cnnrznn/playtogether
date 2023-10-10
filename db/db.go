@@ -152,3 +152,7 @@ func Expire() {
 		time.Now().Unix(),
 	)
 }
+
+func StorePlayerGame(playerID uuid.UUID, game model.Game) {
+
+}
