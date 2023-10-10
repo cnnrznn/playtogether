@@ -1,4 +1,4 @@
-package play
+package service
 
 import (
 	"math"

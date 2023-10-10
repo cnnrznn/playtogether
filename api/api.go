@@ -2,19 +2,29 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/cnnrznn/playtogether/model"
-	"github.com/cnnrznn/playtogether/play"
+	"github.com/cnnrznn/playtogether/service"
 )
 
 func Run() error {
-	http.HandleFunc("/play", HandlePlay)
+	http.HandleFunc("/ping", HandlePing)
+	http.HandleFunc("/games", HandleGames)
 
 	return http.ListenAndServe(":8080", nil)
 }
 
-func HandlePlay(w http.ResponseWriter, req *http.Request) {
+func HandleGames(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		writeError(w, fmt.Errorf("bad method for /games endpoint"), http.StatusBadRequest)
+		return
+	}
+
+}
+
+func HandlePing(w http.ResponseWriter, req *http.Request) {
 	var ping model.Ping
 
 	err := json.NewDecoder(req.Body).Decode(&ping)
@@ -23,7 +33,7 @@ func HandlePlay(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	response, err := play.Update(ping)
+	response, err := service.Update(ping)
 	if err != nil {
 		writeError(w, err, http.StatusInternalServerError)
 		return

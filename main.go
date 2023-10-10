@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/cnnrznn/playtogether/api"
-	"github.com/cnnrznn/playtogether/play"
+	"github.com/cnnrznn/playtogether/service"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	wg.Add(2)
 
 	go func() {
-		errs <- play.Run()
+		errs <- service.Run()
 		wg.Done()
 	}()
 
