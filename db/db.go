@@ -45,7 +45,7 @@ func LoadGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 	games := []model.Game{}
 
 	rows, err := db.Query(`
-		SELECT id, lat, lon FROM games
+		SELECT id, lat, lon, activity FROM games
 			WHERE
 				activity = $5 AND
 				lat < $1 AND lat > $2 AND lon < $3 AND lon > $4`,
@@ -63,6 +63,7 @@ func LoadGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 			&game.Id,
 			&game.Lat,
 			&game.Lon,
+			&game.Activity,
 		)
 		if err != nil {
 			return nil, err
@@ -78,7 +79,7 @@ func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 	pings := []model.Ping{}
 
 	rows, err := db.Query(`
-		SELECT id, player, lat, lon, range_km FROM ping
+		SELECT id, player, lat, lon, activity, range_km, expire FROM ping
 		WHERE
 			activity = $1 AND
 			lat < $2 AND lat > $3 AND lon < $4 AND lon > $5`,
@@ -97,7 +98,9 @@ func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 			&ping.Player,
 			&ping.Lat,
 			&ping.Lon,
+			&ping.Activity,
 			&ping.RangeKM,
+			&ping.Expire,
 		)
 		if err != nil {
 			return nil, err
