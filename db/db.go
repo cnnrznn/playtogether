@@ -112,7 +112,7 @@ func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 	return pings, nil
 }
 
-func StorePing(ping model.Ping) error {
+func StorePing(ping model.Ping) (*uuid.UUID, error) {
 	result, err := db.Exec(`
 			INSERT INTO ping (id, player, lat, lon, range_km, expire, activity) VALUES
 			($1, $2, $3, $4, $5, $6, $7)
@@ -122,13 +122,25 @@ func StorePing(ping model.Ping) error {
 		ping.ID, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire, ping.Activity,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if n, err := result.RowsAffected(); err != nil || n != 1 {
-		return fmt.Errorf("could not insert ping in table: %w", err)
+		return nil, fmt.Errorf("could not insert ping in table: %w", err)
 	}
 
-	return nil
+	row := db.QueryRow(`
+		SELECT id from ping
+		WHERE player=$1 AND activity=$2`,
+		ping.Player, ping.Activity)
+
+	var pingID uuid.UUID
+
+	err = row.Scan(&pingID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pingID, nil
 }
 
 func StoreGame(game model.Game) error {

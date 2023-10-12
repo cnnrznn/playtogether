@@ -26,14 +26,14 @@ func GetPlayerGames(player model.Player) []model.Game {
 }
 
 func Update(ping model.Ping) (*Response, error) {
-	ping.ID = uuid.New()
-
 	area := calculateArea(ping)
 
-	err := db.StorePing(ping)
+	ping.ID = uuid.New()
+	id, err := db.StorePing(ping)
 	if err != nil {
 		return nil, err
 	}
+	ping.ID = *id
 
 	// First, check for games already going on in the area
 	games, err := db.LoadGames(ping, area)
