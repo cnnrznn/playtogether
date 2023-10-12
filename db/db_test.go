@@ -22,12 +22,12 @@ func TestDuplicatePlayerActivity(t *testing.T) {
 		RangeKM:  20,
 	}
 
-	err := StorePing(ping)
+	_, err := StorePing(ping)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = StorePing(ping)
+	_, err = StorePing(ping)
 	if err != nil {
 		t.Error(err)
 	}
