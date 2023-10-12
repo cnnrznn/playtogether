@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -25,6 +26,8 @@ func GetPlayerGames(player model.Player) []model.Game {
 }
 
 func Update(ping model.Ping) (*Response, error) {
+	ping.ID = uuid.New()
+
 	area := calculateArea(ping)
 
 	err := db.StorePing(ping)
@@ -183,7 +186,10 @@ func runExpire() error {
 	ticker := time.NewTicker(1 * time.Minute)
 
 	for range ticker.C {
-		db.Expire()
+		err := db.Expire()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	return nil
