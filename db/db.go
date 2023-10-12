@@ -78,7 +78,7 @@ func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 	pings := []model.Ping{}
 
 	rows, err := db.Query(`
-		SELECT player, lat, lon, range_km FROM ping
+		SELECT id, player, lat, lon, range_km FROM ping
 		WHERE
 			activity = $1 AND
 			lat < $2 AND lat > $3 AND lon < $4 AND lon > $5`,
@@ -93,6 +93,7 @@ func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 		ping := model.Ping{}
 
 		err := rows.Scan(
+			&ping.ID,
 			&ping.Player,
 			&ping.Lat,
 			&ping.Lon,
@@ -146,16 +147,55 @@ func StoreGame(game model.Game) error {
 }
 
 func Expire() {
-	// TODO dissociate every player from the game
-	// player2game and games
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	// if a game is below threshold, delete game
-
-	db.Exec(`
+	result, err := tx.Query(`
 		DELETE FROM ping
-		WHERE expire < $1`,
+		WHERE expire < $1
+		RETURNING player, id, game`,
 		time.Now().Unix(),
 	)
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+	defer result.Close()
+
+	pings := []model.Ping{}
+
+	for result.Next() {
+		var playerID, pingID uuid.UUID
+		err := result.Scan(&playerID, &pingID)
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		pings = append(pings, model.Ping{
+			Player: playerID,
+			ID:     pingID,
+		})
+	}
+	if result.Err() != nil {
+		tx.Rollback()
+		return
+	}
+
+	for _, ping := range pings {
+		_, err := tx.Exec(`
+			DELETE FROM player2game
+			WHERE ping=$1`,
+			ping.ID)
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+	}
+
+	tx.Commit()
 }
 
 func StorePlayerGame(ping model.Ping, game model.Game) {
@@ -166,11 +206,11 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 	}
 
 	_, err = tx.Exec(`
-			INSERT INTO player2game (player, game)
+			INSERT INTO player2game (player, game, ping)
 			VALUES
-				($1, $2)
+				($1, $2, $3)
 			ON CONFLICT DO NOTHING`,
-		ping.Player, game.Id,
+		ping.Player, game.Id, ping.ID,
 	)
 	if err != nil {
 		tx.Rollback()
@@ -178,8 +218,6 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 	}
 
 	tx.Commit()
-
-	// TODO also map game->ping to calculate start,end, etc.
 }
 
 func LoadPlayerGames(player model.Player) []model.Game {

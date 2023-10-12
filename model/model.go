@@ -7,6 +7,7 @@ import (
 )
 
 type Ping struct {
+	ID       uuid.UUID `json:"id"`
 	Player   uuid.UUID `json:"player"`
 	Activity string    `json:"activity"`
 	Lat      float64   `json:"lat"`
