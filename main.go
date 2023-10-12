@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	// TODO use a proper logging library
+
 	errs := make(chan error)
 
 	wg := &sync.WaitGroup{}
