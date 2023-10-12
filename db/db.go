@@ -146,6 +146,11 @@ func StoreGame(game model.Game) error {
 }
 
 func Expire() {
+	// TODO dissociate every player from the game
+	// player2game and games
+
+	// if a game is below threshold, delete game
+
 	db.Exec(`
 		DELETE FROM ping
 		WHERE expire < $1`,
