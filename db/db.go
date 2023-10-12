@@ -110,15 +110,13 @@ func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 }
 
 func StorePing(ping model.Ping) error {
-	id := uuid.New()
-
 	result, err := db.Exec(`
 			INSERT INTO ping (id, player, lat, lon, range_km, expire, activity) VALUES
 			($1, $2, $3, $4, $5, $6, $7)
 			ON CONFLICT ON CONSTRAINT unq_player_activity
 			DO UPDATE SET
 				lat=$3, lon=$4, range_km=$5, expire=$6`,
-		id, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire, ping.Activity,
+		ping.ID, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire, ping.Activity,
 	)
 	if err != nil {
 		return err
@@ -146,22 +144,21 @@ func StoreGame(game model.Game) error {
 	return nil
 }
 
-func Expire() {
+func Expire() error {
 	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	result, err := tx.Query(`
 		DELETE FROM ping
 		WHERE expire < $1
-		RETURNING player, id, game`,
+		RETURNING player, id`,
 		time.Now().Unix(),
 	)
 	if err != nil {
 		tx.Rollback()
-		return
+		return err
 	}
 	defer result.Close()
 
@@ -172,7 +169,7 @@ func Expire() {
 		err := result.Scan(&playerID, &pingID)
 		if err != nil {
 			tx.Rollback()
-			return
+			return err
 		}
 		pings = append(pings, model.Ping{
 			Player: playerID,
@@ -181,7 +178,7 @@ func Expire() {
 	}
 	if result.Err() != nil {
 		tx.Rollback()
-		return
+		return result.Err()
 	}
 
 	for _, ping := range pings {
@@ -191,11 +188,13 @@ func Expire() {
 			ping.ID)
 		if err != nil {
 			tx.Rollback()
-			return
+			return err
 		}
 	}
 
 	tx.Commit()
+
+	return nil
 }
 
 func StorePlayerGame(ping model.Ping, game model.Game) {
