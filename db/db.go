@@ -232,6 +232,25 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 		ping.Player, game.Id, ping.ID,
 	)
 	if err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return
+	}
+
+	playersBS, err := json.Marshal(game.Players)
+	if err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return
+	}
+
+	_, err = tx.Exec(`
+		UPDATE games
+		SET players=$1
+		WHERE id=$2`,
+		playersBS, game.Id)
+	if err != nil {
+		fmt.Println(err)
 		tx.Rollback()
 		return
 	}
