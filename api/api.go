@@ -18,6 +18,8 @@ func Run() error {
 }
 
 func HandleGames(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	if req.Method != "GET" {
 		writeError(w, fmt.Errorf("bad method for /games endpoint"), http.StatusBadRequest)
 		return
@@ -47,6 +49,8 @@ func HandleGames(w http.ResponseWriter, req *http.Request) {
 }
 
 func HandlePing(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	var ping model.Ping
 
 	err := json.NewDecoder(req.Body).Decode(&ping)
