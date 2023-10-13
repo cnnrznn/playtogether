@@ -23,10 +23,11 @@ type Player struct {
 }
 
 type Game struct {
-	Id       uuid.UUID `json:"id"`
-	Activity string    `json:"activity"`
-	Lat      float64   `json:"lat"`
-	Lon      float64   `json:"lon"`
+	Id       uuid.UUID   `json:"id"`
+	Activity string      `json:"activity"`
+	Lat      float64     `json:"lat"`
+	Lon      float64     `json:"lon"`
+	Players  []uuid.UUID `json:"players"`
 }
 
 type Area struct {
