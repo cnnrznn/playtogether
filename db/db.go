@@ -47,9 +47,9 @@ func LoadGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 
 	rows, err := db.Query(`
 		SELECT id, lat, lon, activity FROM games
-			WHERE
-				activity = $5 AND
-				lat < $1 AND lat > $2 AND lon < $3 AND lon > $4`,
+		WHERE
+			activity = $5 AND
+			lat < $1 AND lat > $2 AND lon < $3 AND lon > $4`,
 		area.LatMax, area.LatMin, area.LonMax, area.LonMin, ping.Activity,
 	)
 	if err != nil {
@@ -115,8 +115,8 @@ func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
 
 func StorePing(ping model.Ping) (*uuid.UUID, error) {
 	result, err := db.Exec(`
-			INSERT INTO ping (id, player, lat, lon, range_km, expire, activity) VALUES
-			($1, $2, $3, $4, $5, $6, $7)
+			INSERT INTO ping (id, player, lat, lon, range_km, expire, activity)
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
 			ON CONFLICT ON CONSTRAINT unq_player_activity
 			DO UPDATE SET
 				lat=$3, lon=$4, range_km=$5, expire=$6`,
@@ -151,8 +151,8 @@ func StoreGame(game model.Game) error {
 	}
 
 	result, err := db.Exec(`
-		INSERT INTO games (id, lat, lon, activity, players) VALUES
-			($1, $2, $3, $4, $5)`,
+		INSERT INTO games (id, lat, lon, activity, players)
+		VALUES ($1, $2, $3, $4, $5)`,
 		game.Id, game.Lat, game.Lon, game.Activity, bs,
 	)
 	if err != nil {
@@ -229,8 +229,7 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 
 	_, err = tx.Exec(`
 			INSERT INTO player2game (player, game, ping)
-			VALUES
-				($1, $2, $3)
+			VALUES ($1, $2, $3)
 			ON CONFLICT DO NOTHING`,
 		ping.Player, game.Id, ping.ID,
 	)
