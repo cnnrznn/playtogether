@@ -42,7 +42,7 @@ func Init() error {
 	return nil
 }
 
-func LoadGames(ping model.Ping, area model.Area) ([]model.Game, error) {
+func LoadGamesByArea(ping model.Ping, area model.Area) ([]model.Game, error) {
 	games := []model.Game{}
 
 	rows, err := db.Query(`
@@ -76,7 +76,7 @@ func LoadGames(ping model.Ping, area model.Area) ([]model.Game, error) {
 	return games, nil
 }
 
-func LoadPings(activity string, area model.Area) ([]model.Ping, error) {
+func LoadPingsByArea(activity string, area model.Area) ([]model.Ping, error) {
 	pings := []model.Ping{}
 
 	rows, err := db.Query(`

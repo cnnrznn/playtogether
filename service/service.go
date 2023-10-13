@@ -36,7 +36,7 @@ func Update(ping model.Ping) (*Response, error) {
 	ping.ID = *id
 
 	// First, check for games already going on in the area
-	games, err := db.LoadGames(ping, area)
+	games, err := db.LoadGamesByArea(ping, area)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func Update(ping model.Ping) (*Response, error) {
 	}
 
 	// Load all players in area for activity
-	players, err := db.LoadPings(ping.Activity, area)
+	players, err := db.LoadPingsByArea(ping.Activity, area)
 	if err != nil {
 		return nil, err
 	}
