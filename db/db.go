@@ -218,11 +218,11 @@ func Expire() error {
 	return nil
 }
 
-func StorePlayerGame(ping model.Ping, game model.Game) {
+func StorePlayerGame(ping model.Ping, game model.Game) error {
 	tx, err := db.Begin()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 
 	_, err = tx.Exec(`
@@ -234,14 +234,14 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 	if err != nil {
 		fmt.Println(err)
 		tx.Rollback()
-		return
+		return err
 	}
 
 	playersBS, err := json.Marshal(game.Players)
 	if err != nil {
 		fmt.Println(err)
 		tx.Rollback()
-		return
+		return err
 	}
 
 	_, err = tx.Exec(`
@@ -252,10 +252,11 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 	if err != nil {
 		fmt.Println(err)
 		tx.Rollback()
-		return
+		return err
 	}
 
 	tx.Commit()
+	return nil
 }
 
 func LoadPlayerGames(player model.Player) []model.Game {
