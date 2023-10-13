@@ -114,29 +114,19 @@ func LoadPingsByArea(activity string, area model.Area) ([]model.Ping, error) {
 }
 
 func StorePing(ping model.Ping) (*uuid.UUID, error) {
-	result, err := db.Exec(`
+	result := db.QueryRow(`
 			INSERT INTO ping (id, player, lat, lon, range_km, expire, activity)
 			VALUES ($1, $2, $3, $4, $5, $6, $7)
 			ON CONFLICT ON CONSTRAINT unq_player_activity
 			DO UPDATE SET
-				lat=$3, lon=$4, range_km=$5, expire=$6`,
+				lat=$3, lon=$4, range_km=$5, expire=$6
+			RETURNING id`,
 		ping.ID, ping.Player, ping.Lat, ping.Lon, ping.RangeKM, ping.Expire, ping.Activity,
 	)
-	if err != nil {
-		return nil, err
-	}
-	if n, err := result.RowsAffected(); err != nil || n != 1 {
-		return nil, fmt.Errorf("could not insert ping in table: %w", err)
-	}
-
-	row := db.QueryRow(`
-		SELECT id from ping
-		WHERE player=$1 AND activity=$2`,
-		ping.Player, ping.Activity)
 
 	var pingID uuid.UUID
 
-	err = row.Scan(&pingID)
+	err := result.Scan(&pingID)
 	if err != nil {
 		return nil, err
 	}
