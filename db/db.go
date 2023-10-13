@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -144,10 +145,15 @@ func StorePing(ping model.Ping) (*uuid.UUID, error) {
 }
 
 func StoreGame(game model.Game) error {
+	bs, err := json.Marshal(game.Players)
+	if err != nil {
+		return err
+	}
+
 	result, err := db.Exec(`
-		INSERT INTO games (id, lat, lon, activity) VALUES
-			($1, $2, $3, $4)`,
-		game.Id, game.Lat, game.Lon, game.Activity,
+		INSERT INTO games (id, lat, lon, activity, players) VALUES
+			($1, $2, $3, $4, $5)`,
+		game.Id, game.Lat, game.Lon, game.Activity, bs,
 	)
 	if err != nil {
 		return err
@@ -205,6 +211,8 @@ func Expire() error {
 			tx.Rollback()
 			return err
 		}
+
+		// remove player from game and delete game
 	}
 
 	tx.Commit()
@@ -263,8 +271,10 @@ func LoadPlayerGames(player model.Player) []model.Game {
 
 	for _, gameID := range gameIDs {
 		var game model.Game
+		var playersBS []byte
+		var players []uuid.UUID
 
-		row := db.QueryRow(`SELECT id, lat, lon, activity from games WHERE id=$1`, gameID)
+		row := db.QueryRow(`SELECT id, lat, lon, activity, players from games WHERE id=$1`, gameID)
 		if row.Err() != nil {
 			fmt.Println(err)
 			continue
@@ -275,10 +285,19 @@ func LoadPlayerGames(player model.Player) []model.Game {
 			&game.Lat,
 			&game.Lon,
 			&game.Activity,
+			&playersBS,
 		); err != nil {
 			fmt.Println(err)
 			continue
 		}
+
+		err := json.Unmarshal(playersBS, &players)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+
+		game.Players = players
 
 		result = append(result, game)
 	}
