@@ -63,7 +63,7 @@ func LoadGamesByArea(ping model.Ping, area model.Area) ([]model.Game, error) {
 		players := []uuid.UUID{}
 
 		err := rows.Scan(
-			&game.Id,
+			&game.ID,
 			&game.Lat,
 			&game.Lon,
 			&game.Activity,
@@ -151,7 +151,7 @@ func StoreGame(game model.Game) error {
 	result, err := db.Exec(`
 		INSERT INTO games (id, lat, lon, activity, players)
 		VALUES ($1, $2, $3, $4, $5)`,
-		game.Id, game.Lat, game.Lon, game.Activity, bs,
+		game.ID, game.Lat, game.Lon, game.Activity, bs,
 	)
 	if err != nil {
 		return err
@@ -229,7 +229,7 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 			INSERT INTO player2game (player, game, ping)
 			VALUES ($1, $2, $3)
 			ON CONFLICT DO NOTHING`,
-		ping.Player, game.Id, ping.ID,
+		ping.Player, game.ID, ping.ID,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -248,7 +248,7 @@ func StorePlayerGame(ping model.Ping, game model.Game) {
 		UPDATE games
 		SET players=$1
 		WHERE id=$2`,
-		playersBS, game.Id)
+		playersBS, game.ID)
 	if err != nil {
 		fmt.Println(err)
 		tx.Rollback()
@@ -297,7 +297,7 @@ func LoadPlayerGames(player model.Player) []model.Game {
 		}
 
 		if err := row.Scan(
-			&game.Id,
+			&game.ID,
 			&game.Lat,
 			&game.Lon,
 			&game.Activity,

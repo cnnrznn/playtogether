@@ -79,7 +79,7 @@ func Update(ping model.Ping) (*Response, error) {
 			filteredPlayerIDs = append(filteredPlayerIDs, ping.Player)
 		}
 		game := model.Game{
-			Id:       uuid.New(),
+			ID:       uuid.New(),
 			Activity: ping.Activity,
 			Lat:      ping.Lat,
 			Lon:      ping.Lon,
