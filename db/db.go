@@ -60,7 +60,7 @@ func LoadGamesByArea(ping model.Ping, area model.Area) ([]model.Game, error) {
 	for rows.Next() {
 		game := model.Game{}
 		playersBS := []byte{}
-		players := []uuid.UUID{}
+		players := make(map[uuid.UUID]struct{})
 
 		err := rows.Scan(
 			&game.ID,
@@ -288,7 +288,7 @@ func LoadPlayerGames(player model.Player) []model.Game {
 	for _, gameID := range gameIDs {
 		var game model.Game
 		var playersBS []byte
-		var players []uuid.UUID
+		var players = make(map[uuid.UUID]struct{})
 
 		row := db.QueryRow(`SELECT id, lat, lon, activity, players from games WHERE id=$1`, gameID)
 		if row.Err() != nil {

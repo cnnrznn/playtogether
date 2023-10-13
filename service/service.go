@@ -43,7 +43,7 @@ func Update(ping model.Ping) (*Response, error) {
 
 	if len(games) > 0 {
 		for _, game := range games {
-			game.Players = append(game.Players, ping.Player)
+			game.Players[ping.Player] = struct{}{}
 			db.StorePlayerGame(ping, game)
 		}
 
