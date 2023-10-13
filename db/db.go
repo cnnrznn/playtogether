@@ -46,7 +46,7 @@ func LoadGamesByArea(ping model.Ping, area model.Area) ([]model.Game, error) {
 	games := []model.Game{}
 
 	rows, err := db.Query(`
-		SELECT id, lat, lon, activity FROM games
+		SELECT id, lat, lon, activity, players FROM games
 		WHERE
 			activity = $5 AND
 			lat < $1 AND lat > $2 AND lon < $3 AND lon > $4`,
@@ -59,17 +59,25 @@ func LoadGamesByArea(ping model.Ping, area model.Area) ([]model.Game, error) {
 
 	for rows.Next() {
 		game := model.Game{}
+		playersBS := []byte{}
+		players := []uuid.UUID{}
 
 		err := rows.Scan(
 			&game.Id,
 			&game.Lat,
 			&game.Lon,
 			&game.Activity,
+			&playersBS,
 		)
 		if err != nil {
 			return nil, err
 		}
 
+		if err := json.Unmarshal(playersBS, &players); err != nil {
+			return nil, err
+		}
+
+		game.Players = players
 		games = append(games, game)
 	}
 

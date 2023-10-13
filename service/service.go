@@ -73,11 +73,16 @@ func Update(ping model.Ping) (*Response, error) {
 	}
 
 	if atThreshold(ping.Activity, filteredPlayers) {
+		filteredPlayerIDs := []uuid.UUID{}
+		for _, ping := range filteredPlayers {
+			filteredPlayerIDs = append(filteredPlayerIDs, ping.Player)
+		}
 		game := model.Game{
 			Id:       uuid.New(),
 			Activity: ping.Activity,
 			Lat:      ping.Lat,
 			Lon:      ping.Lon,
+			Players:  filteredPlayerIDs,
 		}
 
 		// put new game in DB
