@@ -201,19 +201,71 @@ func Expire() error {
 	}
 
 	for _, ping := range pings {
-		_, err := tx.Exec(`
+		row := tx.QueryRow(`
 			DELETE FROM player2game
-			WHERE ping=$1`,
-			ping.ID)
-		if err != nil {
+			WHERE ping=$1 AND player=$2
+			RETURNING game`,
+			ping.ID, ping.Player)
+		var gameID uuid.UUID
+		if err := row.Scan(&gameID); err != nil {
 			tx.Rollback()
 			return err
 		}
 
-		// remove player from game and delete game
+		if err := RemovePlayerFromGame(tx, ping.Player, gameID); err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	tx.Commit()
+
+	return nil
+}
+
+func RemovePlayerFromGame(tx *sql.Tx, playerID, gameID uuid.UUID) error {
+	// load game's player list
+	row := tx.QueryRow(`
+		SELECT players FROM games
+		WHERE id=$1`,
+		gameID)
+	var playerBS []byte
+	if err := row.Scan(
+		&playerBS,
+	); err != nil {
+		return err
+	}
+
+	players := make(map[uuid.UUID]struct{})
+	if err := json.Unmarshal(playerBS, &players); err != nil {
+		return err
+	}
+
+	delete(players, playerID)
+
+	if len(players) == 0 {
+		if _, err := tx.Exec(`
+			DELETE FROM games
+			WHERE id=$1`, gameID,
+		); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	playerBS, err := json.Marshal(players)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`
+		UPDATE games
+		SET players=$1
+		WHERE id=$2`,
+		playerBS, gameID)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
