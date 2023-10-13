@@ -74,9 +74,9 @@ func Update(ping model.Ping) (*Response, error) {
 	}
 
 	if atThreshold(ping.Activity, filteredPlayers) {
-		filteredPlayerIDs := []uuid.UUID{}
+		filteredPlayerIDs := make(map[uuid.UUID]struct{})
 		for _, ping := range filteredPlayers {
-			filteredPlayerIDs = append(filteredPlayerIDs, ping.Player)
+			filteredPlayerIDs[ping.Player] = struct{}{}
 		}
 		game := model.Game{
 			ID:       uuid.New(),
