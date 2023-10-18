@@ -22,6 +22,10 @@ func GetPlayRequests(
 		return nil, err
 	}
 
+	if userPR == nil {
+		return nil, nil
+	}
+
 	// Query for all play requests that match activity + range
 	a := area.Calculate(userPR.Lat, userPR.Lon, userPR.RangeKM)
 	prs, err := db.LoadPlayRequestArea(*userPR, a)
