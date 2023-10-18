@@ -5,15 +5,18 @@ import (
 	"sync"
 
 	"github.com/cnnrznn/playtogether/api"
+	"github.com/cnnrznn/playtogether/service"
 )
 
 func main() {
 	// TODO use a proper logging library
 
-	errs := make(chan error)
+	errs := make(chan error, 1)
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
+
+	errs <- service.Init()
 
 	go func() {
 		errs <- api.Run()
