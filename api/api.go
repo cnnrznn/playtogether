@@ -89,7 +89,7 @@ func PostPlayRequest(w http.ResponseWriter, req *http.Request) {
 	var pr model.PlayRequest
 
 	if err := json.NewDecoder(req.Body).Decode(&pr); err != nil {
-		writeError(w, fmt.Errorf("could not decode json"), http.StatusInternalServerError)
+		writeError(w, fmt.Errorf("could not decode json: %w", err), http.StatusInternalServerError)
 		return
 	}
 
