@@ -54,8 +54,9 @@ func UpsertPlayRequest(pr model.PlayRequest) error {
 
 func LoadPlayRequestUser(userID uuid.UUID) (*model.PlayRequest, error) {
 	res := db.QueryRow(`
-		SELECT user_id, size, activity, lat, lon, start_time, end_time, range_km FROM playrequest
-		WHERE user=$1`,
+		SELECT user_id, size, activity, lat, lon, start_time, end_time, range_km
+		FROM playrequest
+		WHERE user_id=$1`,
 		userID)
 
 	var pr model.PlayRequest
@@ -81,7 +82,7 @@ func LoadPlayRequestUser(userID uuid.UUID) (*model.PlayRequest, error) {
 
 func LoadPlayRequestArea(pr model.PlayRequest, area model.Area) ([]model.PlayRequest, error) {
 	rows, err := db.Query(`
-		SELECT user_id, size activity, lat, lon, start_time, end_time, range_km
+		SELECT user_id, size, activity, lat, lon, start_time, end_time, range_km
 		FROM playrequest
 		WHERE activity=$1 AND
 			lat > $2 AND lat < $3 AND lon > $4 AND lon < $5`,
