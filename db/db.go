@@ -41,10 +41,10 @@ func Init() error {
 
 func UpsertPlayRequest(pr model.PlayRequest) error {
 	if _, err := db.Exec(`
-		INSERT INTO playrequest (user, size, activity, lat, lon, start, end, range_km)
+		INSERT INTO playrequest (user_id, size, activity, lat, lon, start_time, end_time, range_km)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		ON CONFLICT ON CONSTRAINT unq_user
-			DO UPDATE SET size=$2, activity=$3, lat=$4, lon=$5, start=$6, end=$7, range_km=$8`,
+		ON CONFLICT (user_id)
+			DO UPDATE SET size=$2, activity=$3, lat=$4, lon=$5, start_time=$6, end_time=$7, range_km=$8`,
 		pr.User, pr.Size, pr.Activity, pr.Lat, pr.Lon, pr.Start, pr.End, pr.RangeKM); err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func UpsertPlayRequest(pr model.PlayRequest) error {
 
 func LoadPlayRequestUser(userID uuid.UUID) (*model.PlayRequest, error) {
 	res := db.QueryRow(`
-		SELECT user, size, activity, lat, lon, start, end, range_km FROM playrequest
+		SELECT user_id, size, activity, lat, lon, start_time, end_time, range_km FROM playrequest
 		WHERE user=$1`,
 		userID)
 
@@ -77,7 +77,7 @@ func LoadPlayRequestUser(userID uuid.UUID) (*model.PlayRequest, error) {
 
 func LoadPlayRequestArea(pr model.PlayRequest, area model.Area) ([]model.PlayRequest, error) {
 	rows, err := db.Query(`
-		SELECT user, size activity, lat, lon, start, end, range_km
+		SELECT user_id, size activity, lat, lon, start_time, end_time, range_km
 		FROM playrequest
 		WHERE activity=$1 AND
 			lat > $2 AND lat < $3 AND lon > $4 AND lon < $5`,
