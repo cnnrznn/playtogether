@@ -13,7 +13,7 @@ type PlayRequest struct {
 	Lat      float64   `json:"lat"`      // location
 	Lon      float64   `json:"lon"`
 	Start    int       `json:"start"`    // start time
-	End      int       `json:"End"`      // end time
+	End      int       `json:"end"`      // end time
 	RangeKM  int       `json:"range_km"` // distance away they'd travel
 
 	// other stuff like age, intensity
