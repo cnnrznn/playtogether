@@ -7,6 +7,7 @@ import (
 
 	"github.com/cnnrznn/playtogether/model"
 	"github.com/cnnrznn/playtogether/service/play"
+	"github.com/google/uuid"
 )
 
 type WebErr struct {
@@ -63,7 +64,25 @@ func HandlePlayRequest(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetPlayRequest(w http.ResponseWriter, req *http.Request) {
-	play.GetPlayRequests()
+	userID := req.URL.Query().Get("user")
+	if len(userID) == 0 {
+		writeError(w, fmt.Errorf("must supply arg 'user'"), http.StatusBadRequest)
+		return
+	}
+
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		writeError(w, fmt.Errorf("could not parse 'user' as UUID"), http.StatusInternalServerError)
+		return
+	}
+
+	prs, err := play.GetPlayRequests(uid)
+	if err != nil {
+		writeError(w, fmt.Errorf("error loading play requests: %w", err), http.StatusInternalServerError)
+		return
+	}
+
+	writeResponse(w, WebRes{Payload: prs})
 }
 
 func PostPlayRequest(w http.ResponseWriter, req *http.Request) {
