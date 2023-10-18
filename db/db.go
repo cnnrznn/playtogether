@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 
@@ -46,6 +47,9 @@ func UpsertPlayRequest(pr model.PlayRequest) error {
 		ON CONFLICT (user_id)
 			DO UPDATE SET size=$2, activity=$3, lat=$4, lon=$5, start_time=$6, end_time=$7, range_km=$8`,
 		pr.User, pr.Size, pr.Activity, pr.Lat, pr.Lon, pr.Start, pr.End, pr.RangeKM); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
 		return err
 	}
 	return nil
@@ -69,6 +73,9 @@ func LoadPlayRequestUser(userID uuid.UUID) (*model.PlayRequest, error) {
 		&pr.End,
 		&pr.RangeKM,
 	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
