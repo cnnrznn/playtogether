@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/cnnrznn/playtogether/api"
-	"github.com/cnnrznn/playtogether/service"
 )
 
 func main() {
@@ -14,12 +13,7 @@ func main() {
 	errs := make(chan error)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(2)
-
-	go func() {
-		errs <- service.Run()
-		wg.Done()
-	}()
+	wg.Add(1)
 
 	go func() {
 		errs <- api.Run()

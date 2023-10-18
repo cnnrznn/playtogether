@@ -6,28 +6,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type Ping struct {
-	ID       uuid.UUID `json:"id"`
-	Player   uuid.UUID `json:"player"`
-	Activity string    `json:"activity"`
-	Lat      float64   `json:"lat"`
+type PlayRequest struct {
+	User     uuid.UUID `json:"user"`     // user who initiated the request
+	Size     int       `json:"size"`     // number of people in group
+	Activity string    `json:"activity"` // sport or activity type
+	Lat      float64   `json:"lat"`      // location
 	Lon      float64   `json:"lon"`
-	Expire   int       `json:"expire"`
-	RangeKM  int       `json:"range_km"`
+	Start    int       `json:"start"`    // start time
+	End      int       `json:"End"`      // end time
+	RangeKM  int       `json:"range_km"` // distance away they'd travel
 
 	// other stuff like age, intensity
-}
-
-type Player struct {
-	ID uuid.UUID `json:"id"`
-}
-
-type Game struct {
-	ID       uuid.UUID              `json:"id"`
-	Activity string                 `json:"activity"`
-	Lat      float64                `json:"lat"`
-	Lon      float64                `json:"lon"`
-	Players  map[uuid.UUID]struct{} `json:"players"`
 }
 
 type Area struct {

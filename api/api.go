@@ -6,17 +6,83 @@ import (
 	"net/http"
 
 	"github.com/cnnrznn/playtogether/model"
-	"github.com/cnnrznn/playtogether/service"
-	"github.com/google/uuid"
+	"github.com/cnnrznn/playtogether/service/play"
 )
 
+type WebErr struct {
+	Error string `json:"error"`
+}
+
+type WebRes struct {
+	Payload any `json:"payload"`
+}
+
 func Run() error {
-	http.HandleFunc("/ping", HandlePing)
-	http.HandleFunc("/games", HandleGames)
+	http.HandleFunc("/play", HandlePlayRequest)
 
 	return http.ListenAndServe(":8080", nil)
 }
 
+func writeError(w http.ResponseWriter, err error, code int) {
+	w.WriteHeader(code)
+
+	bs, err := json.Marshal(WebErr{
+		Error: err.Error(),
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{\"error\":\"problem serializing response\"}"))
+		return
+	}
+
+	w.Write(bs)
+}
+
+func writeResponse(w http.ResponseWriter, payload WebRes) {
+	w.WriteHeader(http.StatusOK)
+
+	bs, err := json.Marshal(payload)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{\"error\":\"problem serializing response\"}"))
+		return
+	}
+
+	w.Write(bs)
+}
+
+func HandlePlayRequest(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	switch req.Method {
+	case "GET":
+		GetPlayRequest(w, req)
+	case "POST":
+		PostPlayRequest(w, req)
+	}
+}
+
+func GetPlayRequest(w http.ResponseWriter, req *http.Request) {
+	play.GetPlayRequests()
+}
+
+func PostPlayRequest(w http.ResponseWriter, req *http.Request) {
+	var pr model.PlayRequest
+
+	if err := json.NewDecoder(req.Body).Decode(&pr); err != nil {
+		writeError(w, fmt.Errorf("could not decode json"), http.StatusInternalServerError)
+		return
+	}
+
+	if err := play.CreatePlayRequest(pr); err != nil {
+		writeError(w, fmt.Errorf("service err: %w", err), http.StatusInternalServerError)
+		return
+	}
+
+	writeResponse(w, WebRes{})
+}
+
+/*
 func HandleGames(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -69,39 +135,4 @@ func HandlePing(w http.ResponseWriter, req *http.Request) {
 		Payload: response,
 	})
 }
-
-type WebErr struct {
-	Error string `json:"error"`
-}
-
-type WebRes struct {
-	Payload any `json:"payload"`
-}
-
-func writeError(w http.ResponseWriter, err error, code int) {
-	w.WriteHeader(code)
-
-	bs, err := json.Marshal(WebErr{
-		Error: err.Error(),
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("{\"error\":\"problem serializing response\"}"))
-		return
-	}
-
-	w.Write(bs)
-}
-
-func writeResponse(w http.ResponseWriter, payload WebRes) {
-	w.WriteHeader(http.StatusOK)
-
-	bs, err := json.Marshal(payload)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("{\"error\":\"problem serializing response\"}"))
-		return
-	}
-
-	w.Write(bs)
-}
+*/
