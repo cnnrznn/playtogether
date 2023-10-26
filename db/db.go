@@ -59,6 +59,14 @@ func StoreGame(game model.Game) error {
 	return nil
 }
 
+func LoadGame(id uuid.UUID) (*model.Game, error) {
+	return nil, nil
+}
+
+func UpdateGame(game model.Game) error {
+	return nil
+}
+
 func UpsertPlayRequest(pr model.PlayRequest) error {
 	if _, err := db.Exec(`
 		INSERT INTO playrequest (user_id, size, activity, lat, lon, start_time, end_time, range_km)

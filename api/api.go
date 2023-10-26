@@ -68,6 +68,7 @@ func HandleGame(w http.ResponseWriter, req *http.Request) {
 	case "create":
 		CreateGame(w, req, gr)
 	case "confirm":
+		ConfirmGame(w, req, gr)
 	case "get":
 	default:
 		writeError(w, fmt.Errorf("unsupported 'game' action"), http.StatusBadRequest)
@@ -75,9 +76,24 @@ func HandleGame(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func ConfirmGame(w http.ResponseWriter, req *http.Request, gr GameRequest) {
+	if err := game.Confirm(gr.GameID, gr.PlayRequestID); err != nil {
+		writeError(w, fmt.Errorf("could not confirm game: %w", err), http.StatusInternalServerError)
+		return
+	}
+
+	writeResponse(w, WebRes{})
+}
+
 func CreateGame(w http.ResponseWriter, req *http.Request, gr GameRequest) {
+	prIDs := make(map[uuid.UUID]struct{})
+
+	for _, id := range gr.PlayRequestIDs {
+		prIDs[id] = struct{}{}
+	}
+
 	if err := game.Create(model.Game{
-		PlayRequests: gr.PlayRequestIDs,
+		PlayRequests: prIDs,
 	}); err != nil {
 		writeError(w, fmt.Errorf("could not create game: %w", err), http.StatusInternalServerError)
 		return

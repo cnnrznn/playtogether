@@ -34,7 +34,7 @@ func (a Area) String() string {
 type Game struct {
 	Version      uuid.UUID
 	ID           uuid.UUID
-	PlayRequests []uuid.UUID
+	PlayRequests map[uuid.UUID]struct{}
 	Status       GameStatus
 	Activity     string
 	Lat          float64
