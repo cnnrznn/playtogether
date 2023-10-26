@@ -30,3 +30,20 @@ func (a Area) String() string {
 		a.LonMin, a.LonMax,
 	)
 }
+
+type Game struct {
+	Version      uuid.UUID
+	ID           uuid.UUID
+	PlayRequests []uuid.UUID
+	Status       GameStatus
+	Activity     string
+	Lat          float64
+	Lon          float64
+}
+
+type GameStatus int
+
+const (
+	PENDING GameStatus = iota
+	ACTIVE
+)

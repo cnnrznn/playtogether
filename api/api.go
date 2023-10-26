@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/cnnrznn/playtogether/model"
+	"github.com/cnnrznn/playtogether/service/game"
 	"github.com/cnnrznn/playtogether/service/play"
 	"github.com/google/uuid"
 )
@@ -20,6 +21,7 @@ type WebRes struct {
 
 func Run() error {
 	http.HandleFunc("/play", HandlePlayRequest)
+	http.HandleFunc("/game", HandleGame)
 
 	return http.ListenAndServe(":8080", nil)
 }
@@ -50,6 +52,38 @@ func writeResponse(w http.ResponseWriter, payload WebRes) {
 	}
 
 	w.Write(bs)
+}
+
+func HandleGame(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	gr := GameRequest{}
+
+	if err := json.NewDecoder(req.Body).Decode(&gr); err != nil {
+		writeError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	switch gr.Action {
+	case "create":
+		CreateGame(w, req, gr)
+	case "confirm":
+	case "get":
+	default:
+		writeError(w, fmt.Errorf("unsupported 'game' action"), http.StatusBadRequest)
+		return
+	}
+}
+
+func CreateGame(w http.ResponseWriter, req *http.Request, gr GameRequest) {
+	if err := game.Create(model.Game{
+		PlayRequests: gr.PlayRequestIDs,
+	}); err != nil {
+		writeError(w, fmt.Errorf("could not create game: %w", err), http.StatusInternalServerError)
+		return
+	}
+
+	writeResponse(w, WebRes{})
 }
 
 func HandlePlayRequest(w http.ResponseWriter, req *http.Request) {

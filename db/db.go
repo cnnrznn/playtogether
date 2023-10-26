@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -37,6 +38,24 @@ func Init() error {
 		initDone = true
 	}
 
+	return nil
+}
+
+func StoreGame(game model.Game) error {
+	versionID := uuid.New()
+
+	blob, err := json.Marshal(game.PlayRequests)
+	if err != nil {
+		return err
+	}
+
+	if _, err := db.Exec(`
+		INSERT INTO game (version, id, status, play_requests, activity, lat, lon)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		versionID, game.ID, game.Status, blob, game.Activity, game.Lat, game.Lon,
+	); err != nil {
+		return err
+	}
 	return nil
 }
 
