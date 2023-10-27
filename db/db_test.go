@@ -69,6 +69,51 @@ func TestStoreAndLoadGame(t *testing.T) {
 	assert.True(t, reflect.DeepEqual(game, *gameLoad))
 }
 
+func TestUpdateGame(t *testing.T) {
+	game := model.Game{
+		ID:       uuid.New(),
+		Status:   model.CREATED,
+		Activity: "test_vball",
+	}
+
+	if err := StoreNewGame(game); err != nil {
+		t.Error(err)
+		return
+	}
+
+	gameL, err := LoadGame(game.ID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	game = *gameL
+	game.Status = model.PENDING
+	game.PlayRequests = map[uuid.UUID]struct{}{
+		uuid.New(): {},
+	}
+
+	if err := UpdateGame(game); err != nil {
+		t.Error(err)
+		return
+	}
+
+	gameL, err = LoadGame(game.ID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	assert.NotEqual(t, game.Version, gameL.Version)
+
+	game.Version = gameL.Version
+
+	if diff := deep.Equal(game, *gameL); diff != nil {
+		t.Error(err)
+		return
+	}
+}
+
 func TestUpsertPlayRequest(t *testing.T) {
 	test_before()
 	defer test_after()
