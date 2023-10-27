@@ -55,8 +55,10 @@ func LoadGamePlayers(gameID uuid.UUID) (map[uuid.UUID]struct{}, error) {
 	return nil, nil
 }
 
-func StoreGame(game model.Game) error {
+func StoreNewGame(game model.Game) error {
 	versionID := uuid.New()
+	game.ID = uuid.New()
+	game.Status = model.CREATED
 
 	blob, err := json.Marshal(game.PlayRequests)
 	if err != nil {
@@ -71,6 +73,26 @@ func StoreGame(game model.Game) error {
 		return err
 	}
 	return nil
+}
+
+func UpdateGame(game model.Game) error {
+	blob, err := json.Marshal(game.PlayRequests)
+	if err != nil {
+		return err
+	}
+
+	newVersion := uuid.New()
+
+	row := db.QueryRow(`
+		UPDATE game
+		SET version=$1, status=$2, play_requests=$3
+		WHERE id=$4 AND version=$5
+		RETURNING id`,
+		newVersion, game.Status, blob,
+		game.ID, game.Version,
+	)
+
+	return row.Err()
 }
 
 func LoadGame(id uuid.UUID) (*model.Game, error) {
@@ -168,7 +190,15 @@ func LoadPlayRequestArea(pr model.PlayRequest, area model.Area) ([]model.PlayReq
 		var pr model.PlayRequest
 
 		if err := rows.Scan(
-			&pr.ID, &pr.User, &pr.Size, &pr.Activity, &pr.Lat, &pr.Lon, &pr.Start, &pr.End, &pr.RangeKM,
+			&pr.ID,
+			&pr.User,
+			&pr.Size,
+			&pr.Activity,
+			&pr.Lat,
+			&pr.Lon,
+			&pr.Start,
+			&pr.End,
+			&pr.RangeKM,
 		); err != nil {
 			return nil, err
 		}

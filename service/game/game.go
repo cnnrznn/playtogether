@@ -7,9 +7,7 @@ import (
 )
 
 func Create(game model.Game) error {
-	game.ID = uuid.New()
-	game.Status = model.CREATED
-	return db.StoreGame(game)
+	return db.StoreNewGame(game)
 }
 
 func Confirm(gameID, prID uuid.UUID) error {
