@@ -7,6 +7,9 @@ import (
 )
 
 func Create(game model.Game) error {
+	game.ID = uuid.New()
+	game.Status = model.CREATED
+
 	return db.StoreNewGame(game)
 }
 
@@ -42,7 +45,7 @@ func Confirm(gameID, prID uuid.UUID) error {
 		game.Status = model.PENDING
 	}
 
-	if err := db.StoreGame(*game); err != nil {
+	if err := db.UpdateGame(*game); err != nil {
 		return err
 	}
 

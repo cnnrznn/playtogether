@@ -45,7 +45,7 @@ func TestStoreAndLoadGame(t *testing.T) {
 		Lon:          1.00,
 	}
 
-	if err := StoreGame(game); err != nil {
+	if err := StoreNewGame(game); err != nil {
 		t.Error(err)
 		return
 	}

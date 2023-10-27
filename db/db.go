@@ -57,8 +57,6 @@ func LoadGamePlayers(gameID uuid.UUID) (map[uuid.UUID]struct{}, error) {
 
 func StoreNewGame(game model.Game) error {
 	versionID := uuid.New()
-	game.ID = uuid.New()
-	game.Status = model.CREATED
 
 	blob, err := json.Marshal(game.PlayRequests)
 	if err != nil {
