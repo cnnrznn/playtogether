@@ -104,8 +104,8 @@ func UpsertPlayRequest(pr model.PlayRequest) error {
 	if _, err := db.Exec(`
 		INSERT INTO playrequest (id, user_id, size, activity, lat, lon, start_time, end_time, range_km)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		ON CONFLICT ON CONSTRAINT (unq_player_activity)
-			DO UPDATE SET size=$3, activity=$4, lat=$5, lon=$6, start_time=$7, end_time=$8, range_km=$9`,
+		ON CONFLICT ON CONSTRAINT unq_player_activity
+			DO UPDATE SET id=$1, size=$3, lat=$5, lon=$6, start_time=$7, end_time=$8, range_km=$9`,
 		id, pr.User, pr.Size, pr.Activity, pr.Lat, pr.Lon, pr.Start, pr.End, pr.RangeKM); err != nil {
 		return err
 	}
@@ -116,12 +116,13 @@ func LoadPlayRequestUserActivity(userID uuid.UUID, activity string) (*model.Play
 	res := db.QueryRow(`
 		SELECT id, user_id, size, activity, lat, lon, start_time, end_time, range_km
 		FROM playrequest
-		WHERE user_id=$1`,
+		WHERE user_id=$1 AND activity=$2`,
 		userID, activity)
 
 	var pr model.PlayRequest
 
 	if err := res.Scan(
+		&pr.ID,
 		&pr.User,
 		&pr.Size,
 		&pr.Activity,
