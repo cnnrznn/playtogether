@@ -15,9 +15,10 @@ func CreatePlayRequest(pr model.PlayRequest) error {
 
 func GetPlayRequests(
 	user uuid.UUID,
+	activity string,
 ) ([]model.PlayRequest, error) {
 	// Get user's play request from DB
-	userPR, err := db.LoadPlayRequestUser(user)
+	userPR, err := db.LoadPlayRequestUserActivity(user, activity)
 	if err != nil {
 		return nil, err
 	}

@@ -126,7 +126,13 @@ func GetPlayRequest(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	prs, err := play.GetPlayRequests(uid)
+	activity := req.URL.Query().Get("activity")
+	if len(activity) == 0 {
+		writeError(w, fmt.Errorf("must supply arg 'activity'"), http.StatusBadRequest)
+		return
+	}
+
+	prs, err := play.GetPlayRequests(uid, activity)
 	if err != nil {
 		writeError(w, fmt.Errorf("error loading play requests: %w", err), http.StatusInternalServerError)
 		return
