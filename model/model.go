@@ -7,6 +7,7 @@ import (
 )
 
 type PlayRequest struct {
+	ID       uuid.UUID `json:"id"`
 	User     uuid.UUID `json:"user"`     // user who initiated the request
 	Size     int       `json:"size"`     // number of people in group
 	Activity string    `json:"activity"` // sport or activity type
@@ -32,8 +33,8 @@ func (a Area) String() string {
 }
 
 type Game struct {
-	Version      uuid.UUID
 	ID           uuid.UUID
+	Version      uuid.UUID
 	PlayRequests map[uuid.UUID]struct{}
 	Status       GameStatus
 	Activity     string
@@ -44,6 +45,7 @@ type Game struct {
 type GameStatus int
 
 const (
-	PENDING GameStatus = iota
+	CREATED GameStatus = iota
+	PENDING
 	ACTIVE
 )
