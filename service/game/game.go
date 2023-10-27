@@ -15,7 +15,23 @@ func Confirm(gameID, prID uuid.UUID) error {
 	// Store a confirmation mapping
 	// gameID --> prID
 	// in new table
+	if err := db.StoreGamePlayer(gameID, prID); err != nil {
+		return err
+	}
 
-	// A game is "pending" when everyone on the pr list confirms
+	game, err := db.LoadGame(gameID)
+	if err != nil {
+		return err
+	}
+
+	prs, err := db.LoadGamePlayers(gameID)
+	if err != nil {
+		return err
+	}
+
+	// check if prs is the same set as game
+	// if yes, tell db to mark game and players as pending for the game
+	//TODO
+
 	return nil
 }
