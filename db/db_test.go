@@ -40,7 +40,7 @@ func TestStoreAndLoadGame(t *testing.T) {
 		ID:           uuid.New(),
 		PlayRequests: playRequests,
 		Status:       model.CREATED,
-		Activity:     "volleyball",
+		Activity:     "test_volleyball",
 		Lat:          -1.00,
 		Lon:          1.00,
 	}
@@ -76,7 +76,7 @@ func TestUpsertPlayRequest(t *testing.T) {
 	playRequest := model.PlayRequest{
 		User:     uuid.New(),
 		Size:     3,
-		Activity: "volleyball",
+		Activity: "test_volleyball",
 		Lat:      -1.00,
 		Lon:      1.00,
 		Start:    1000,
