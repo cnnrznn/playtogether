@@ -60,7 +60,36 @@ func StoreGame(game model.Game) error {
 }
 
 func LoadGame(id uuid.UUID) (*model.Game, error) {
-	return nil, nil
+	res := db.QueryRow(`
+		SELECT (version, id, status, play_requests, activity, lat, lon)
+		FROM game
+		WHERE id=$1`,
+		id,
+	)
+
+	var game model.Game
+	var playRequestBS []byte
+
+	if err := res.Scan(
+		&game.Version,
+		&game.ID,
+		&game.Status,
+		&playRequestBS,
+		&game.Activity,
+		&game.Lat,
+		&game.Lon,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	if err := json.Unmarshal(playRequestBS, &game.PlayRequests); err != nil {
+		return nil, err
+	}
+
+	return &game, nil
 }
 
 func UpdateGame(game model.Game) error {
