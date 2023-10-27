@@ -12,15 +12,10 @@ func Create(game model.Game) error {
 }
 
 func Confirm(gameID, prID uuid.UUID) error {
-	game, err := db.LoadGame(gameID)
-	if err != nil {
-		return err
-	}
+	// Store a confirmation mapping
+	// gameID --> prID
+	// in new table
 
-	game.PlayRequests[prID] = struct{}{}
-
-	if err := db.UpdateGame(*game); err != nil {
-		return err
-	}
+	// A game is "pending" when everyone on the pr list confirms
 	return nil
 }
