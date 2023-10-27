@@ -47,6 +47,14 @@ func Init() error {
 	return initInternal(DB_CONN)
 }
 
+func StoreGamePlayer(gameID, playRequestID uuid.UUID, status string) error {
+	return nil
+}
+
+func LoadGamePlayers(gameID uuid.UUID) (map[uuid.UUID]struct{}, error) {
+	return nil, nil
+}
+
 func StoreGame(game model.Game) error {
 	versionID := uuid.New()
 
@@ -143,7 +151,7 @@ func LoadPlayRequestUserActivity(userID uuid.UUID, activity string) (*model.Play
 
 func LoadPlayRequestArea(pr model.PlayRequest, area model.Area) ([]model.PlayRequest, error) {
 	rows, err := db.Query(`
-		SELECT user_id, size, activity, lat, lon, start_time, end_time, range_km
+		SELECT id, user_id, size, activity, lat, lon, start_time, end_time, range_km
 		FROM playrequest
 		WHERE activity=$1 AND
 			lat > $2 AND lat < $3 AND lon > $4 AND lon < $5`,
@@ -160,7 +168,7 @@ func LoadPlayRequestArea(pr model.PlayRequest, area model.Area) ([]model.PlayReq
 		var pr model.PlayRequest
 
 		if err := rows.Scan(
-			&pr.User, &pr.Size, &pr.Activity, &pr.Lat, &pr.Lon, &pr.Start, &pr.End, &pr.RangeKM,
+			&pr.ID, &pr.User, &pr.Size, &pr.Activity, &pr.Lat, &pr.Lon, &pr.Start, &pr.End, &pr.RangeKM,
 		); err != nil {
 			return nil, err
 		}
