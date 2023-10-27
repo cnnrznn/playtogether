@@ -68,3 +68,52 @@ func TestStoreAndLoadGame(t *testing.T) {
 
 	assert.True(t, reflect.DeepEqual(game, *gameLoad))
 }
+
+func TestUpsertPlayRequest(t *testing.T) {
+	test_before()
+	defer test_after()
+
+	playRequest := model.PlayRequest{
+		User:     uuid.New(),
+		Size:     3,
+		Activity: "volleyball",
+		Lat:      -1.00,
+		Lon:      1.00,
+		Start:    1000,
+		End:      1100,
+		RangeKM:  20,
+	}
+
+	if err := UpsertPlayRequest(playRequest); err != nil {
+		t.Error(err)
+		return
+	}
+
+	prLoad, err := LoadPlayRequestUserActivity(playRequest.User, playRequest.Activity)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	playRequest.ID = prLoad.ID
+
+	assert.True(t, reflect.DeepEqual(*prLoad, playRequest))
+
+	playRequest.Size = 10
+	oldID := prLoad.ID
+
+	if err := UpsertPlayRequest(playRequest); err != nil {
+		t.Error(err)
+		return
+	}
+
+	prLoad2, err := LoadPlayRequestUserActivity(playRequest.User, playRequest.Activity)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	assert.NotEqual(t, oldID, prLoad2.ID)
+	assert.Equal(t, 10, prLoad2.Size)
+
+}
